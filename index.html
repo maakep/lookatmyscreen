@@ -591,6 +591,7 @@
       <div class="invite-link-box" id="vlink-${idx}">Generating...</div>
       <div class="btn-row">
         <button class="btn-primary" id="vcopy-${idx}" onclick="copyInviteLink(${idx})" disabled>Copy Invite Link</button>
+        <button class="btn-secondary" id="vslack-${idx}" onclick="copyInviteLinkSlack(${idx})" disabled>Copy for Slack</button>
       </div>
       <button class="manual-toggle" onclick="toggleManual(${idx})">Manual paste fallback</button>
       <div class="manual-section" id="vmanual-${idx}">
@@ -631,6 +632,7 @@
 
     document.getElementById('vlink-' + idx).textContent = link;
     document.getElementById('vcopy-' + idx).disabled = false;
+    document.getElementById('vslack-' + idx).disabled = false;
 
     const statusEl = document.getElementById('vstatus-' + idx);
     statusEl.textContent = 'Waiting for viewer';
@@ -645,6 +647,17 @@
     if (!viewer) return;
     navigator.clipboard.writeText(viewer.link).then(() => {
       setStatus('Invite link copied to clipboard.', 'success');
+    }).catch(() => {
+      setStatus('Could not copy. Select the link manually.', 'error');
+    });
+  }
+
+  function copyInviteLinkSlack(idx) {
+    const viewer = viewers.get(idx);
+    if (!viewer) return;
+    const slack = `[Click to see my screen](${viewer.link})`;
+    navigator.clipboard.writeText(slack).then(() => {
+      setStatus('Slack-formatted invite link copied to clipboard.', 'success');
     }).catch(() => {
       setStatus('Could not copy. Select the link manually.', 'error');
     });
@@ -768,6 +781,7 @@
         <div class="response-link-box" id="responseLinkBox">${responseLink}</div>
         <div class="btn-row" style="justify-content:center;">
           <button class="btn-primary" id="copyResponseLink">Copy Response Link</button>
+          <button class="btn-secondary" id="copyResponseLinkSlack">Copy for Slack</button>
         </div>
         <div class="result-box info" style="margin-top:1rem;">Waiting for the sharer to open your response link...</div>
       `;
@@ -777,6 +791,16 @@
           document.getElementById('copyResponseLink').textContent = 'Copied!';
           setTimeout(() => {
             document.getElementById('copyResponseLink').textContent = 'Copy Response Link';
+          }, 2000);
+        });
+      };
+
+      document.getElementById('copyResponseLinkSlack').onclick = () => {
+        const slack = `[Click to establish connection with me](${responseLink})`;
+        navigator.clipboard.writeText(slack).then(() => {
+          document.getElementById('copyResponseLinkSlack').textContent = 'Copied!';
+          setTimeout(() => {
+            document.getElementById('copyResponseLinkSlack').textContent = 'Copy for Slack';
           }, 2000);
         });
       };
