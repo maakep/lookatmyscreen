@@ -233,17 +233,18 @@
   #viewerOverlay .overlay-label { color: #6c63ff; font-size: 0.85rem; font-weight: 600; }
   #viewerOverlay .overlay-status { color: #6c6; font-size: 0.75rem; }
 
-  /* Auto-viewer page (opened via link) */
-  #autoViewerPage {
+  /* Interstitial pages (viewer offer page + answer relay page) */
+  .interstitial {
     display: none;
     text-align: center;
     padding: 3rem 1.5rem;
     max-width: 600px;
+    width: 100%;
   }
 
-  #autoViewerPage h2 { margin-bottom: 0.5rem; }
+  .interstitial h2 { margin-bottom: 0.5rem; }
 
-  #autoViewerPage .desc {
+  .interstitial .desc {
     color: #888;
     font-size: 0.85rem;
     margin-bottom: 1.5rem;
@@ -262,10 +263,7 @@
 
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .done-message {
-    background: #1a2e1a;
-    border: 1px solid #2a4e2a;
-    color: #6c6;
+  .result-box {
     padding: 1rem;
     border-radius: 8px;
     margin-top: 1rem;
@@ -273,19 +271,23 @@
     line-height: 1.5;
   }
 
-  .error-message {
-    background: #2e1a1a;
-    border: 1px solid #4e2a2a;
-    color: #c66;
-    padding: 1rem;
-    border-radius: 8px;
-    margin-top: 1rem;
-    font-size: 0.9rem;
-    line-height: 1.5;
-  }
+  .result-box.success { background: #1a2e1a; border: 1px solid #2a4e2a; color: #6c6; }
+  .result-box.error { background: #2e1a1a; border: 1px solid #4e2a2a; color: #c66; }
+  .result-box.info { background: #1a1a2e; border: 1px solid #2a2a4e; color: #88f; }
 
-  .fallback-section {
-    margin-top: 1.5rem;
+  .response-link-box {
+    background: #0a0a0f;
+    border: 1px solid #6c63ff;
+    border-radius: 8px;
+    padding: 0.6rem 0.75rem;
+    margin: 1rem 0;
+    word-break: break-all;
+    font-size: 0.7rem;
+    color: #6c63ff;
+    font-family: 'Consolas', 'Monaco', monospace;
+    max-height: 80px;
+    overflow-y: auto;
+    user-select: all;
     text-align: left;
   }
 
@@ -310,7 +312,9 @@
 <h1 id="mainTitle">Look At My Screen</h1>
 <p class="subtitle" id="mainSubtitle">Peer-to-peer screen sharing. No backend. Just a link.</p>
 
-<!-- Normal setup UI (sharer + manual viewer) -->
+<!-- ==================== -->
+<!-- ROUTE 1: Normal home (sharer + manual viewer) -->
+<!-- ==================== -->
 <div class="container" id="setupUI">
   <div class="steps">
     <button class="step-btn active" onclick="showPanel('share', this)">Share My Screen</button>
@@ -322,13 +326,13 @@
     <h2>Share Your Screen</h2>
     <p class="desc">
       Start sharing, then send the invite link to each viewer.
-      Viewers open the link and the connection is established automatically.
+      The viewer will send you a response link back. Open it, and the connection completes automatically.
     </p>
 
     <ol>
       <li>Click <strong>Start Sharing</strong> to pick a screen/window</li>
       <li>Send each viewer's <strong>invite link</strong> (via Slack, email, etc.)</li>
-      <li>Viewers open the link and connect automatically</li>
+      <li>The viewer sends you a <strong>response link</strong> back - just click it</li>
       <li>Use <strong>+ Add Viewer</strong> for additional viewers</li>
     </ol>
 
@@ -345,7 +349,7 @@
 
   <!-- MANUAL VIEW PANEL (fallback) -->
   <div id="panel-view" class="panel">
-    <h2>View a Screen</h2>
+    <h2>View a Screen (Manual)</h2>
     <p class="desc">If you received a raw code instead of a link, paste it here to connect manually.</p>
 
     <ol>
@@ -372,22 +376,29 @@
   <div id="status"></div>
 </div>
 
-<!-- Auto-viewer page (shown when opened via invite link) -->
-<div id="autoViewerPage">
-  <div class="spinner" id="autoSpinner"></div>
-  <h2 id="autoTitle">Connecting...</h2>
-  <p class="desc" id="autoDesc">Generating response and sending it back to the sharer. Please wait.</p>
-  <div id="autoResult"></div>
-  <div class="fallback-section" id="autoFallback" style="display:none">
-    <label style="font-size:0.8rem;color:#888;">Response code (copy and send back to the sharer manually):</label>
-    <textarea id="autoFallbackCode" readonly></textarea>
-    <div class="btn-row">
-      <button class="btn-secondary" onclick="copyText('autoFallbackCode')">Copy Response Code</button>
-    </div>
-  </div>
+<!-- ==================== -->
+<!-- ROUTE 2: Viewer page (opened via #offer= link on viewer's machine) -->
+<!-- ==================== -->
+<div class="interstitial" id="viewerOfferPage">
+  <div class="spinner" id="offerSpinner"></div>
+  <h2 id="offerTitle">Preparing to view screen...</h2>
+  <p class="desc" id="offerDesc">Generating your response. One moment.</p>
+  <div id="offerResult"></div>
 </div>
 
+<!-- ==================== -->
+<!-- ROUTE 3: Answer relay page (opened via #answer= link on sharer's machine) -->
+<!-- ==================== -->
+<div class="interstitial" id="answerRelayPage">
+  <div class="spinner" id="relaySpinner"></div>
+  <h2 id="relayTitle">Connecting...</h2>
+  <p class="desc" id="relayDesc">Sending response to the sharer tab.</p>
+  <div id="relayResult"></div>
+</div>
+
+<!-- ==================== -->
 <!-- Full-page viewer screen -->
+<!-- ==================== -->
 <div id="viewerScreen">
   <video id="remoteVideo" autoplay playsinline></video>
   <div id="viewerOverlay">
@@ -414,27 +425,28 @@
   // =============================================
   let localStream = null;
   let viewerIndex = 0;
-  const viewers = new Map(); // idx -> { pc, state }
-  let viewerPc = null;       // viewer role
-  const sessionId = crypto.randomUUID(); // unique per sharer tab
+  const viewers = new Map();
+  let viewerPc = null;
+  const sessionId = crypto.randomUUID();
 
   // =============================================
-  // BROADCAST CHANNEL (same-origin cross-tab)
+  // BROADCAST CHANNEL
+  // Only used for: answer relay tab -> sharer tab (same machine)
   // =============================================
   const bc = new BroadcastChannel('lookatmyscreen');
 
   bc.onmessage = (e) => {
-    const { type, sid, idx, code } = e.data;
+    const { type } = e.data;
 
-    // Sharer receives an answer from a viewer tab
-    if (type === 'answer' && sid === sessionId) {
-      receiveAnswerFromBroadcast(idx, code);
+    // Sharer tab receives answer from a relay tab on the same machine
+    if (type === 'answer' && e.data.sid === sessionId) {
+      receiveAnswerFromBroadcast(e.data.idx, e.data.code);
     }
 
-    // Viewer tab receives ack from sharer -> safe to close
-    if (type === 'ack' && e.data.ackFor === ackId) {
-      gotAck = true;
-      handleAck();
+    // Relay tab receives ack from sharer tab
+    if (type === 'ack' && e.data.ackFor === relayAckId) {
+      relayGotAck = true;
+      handleRelayAck();
     }
   };
 
@@ -442,27 +454,41 @@
   // URL HASH PARSING
   // =============================================
   function parseHash() {
-    const hash = location.hash.slice(1); // remove #
+    const hash = location.hash.slice(1);
     const params = new URLSearchParams(hash);
     return {
       offer: params.get('offer'),
+      answer: params.get('answer'),
       idx: params.get('idx'),
       sid: params.get('sid')
     };
   }
 
   // =============================================
-  // BOOT: decide which mode to show
+  // BOOT: decide which route
   // =============================================
   const hashParams = parseHash();
-  let ackId = null;
-  let gotAck = false;
+  let relayAckId = null;
+  let relayGotAck = false;
 
   if (hashParams.offer && hashParams.sid) {
-    // Opened via invite link -> auto-viewer mode
-    bootAutoViewer(hashParams);
+    // ROUTE 2: Viewer opened invite link (different machine)
+    hideDefaultUI();
+    document.getElementById('viewerOfferPage').style.display = 'block';
+    bootViewerOfferPage(hashParams);
+  } else if (hashParams.answer && hashParams.sid) {
+    // ROUTE 3: Sharer clicked response link (same machine as sharer tab)
+    hideDefaultUI();
+    document.getElementById('answerRelayPage').style.display = 'block';
+    bootAnswerRelayPage(hashParams);
   }
-  // else: normal mode (sharer / manual viewer), default UI shown
+  // else: ROUTE 1: Normal home page
+
+  function hideDefaultUI() {
+    document.getElementById('setupUI').style.display = 'none';
+    document.getElementById('mainTitle').style.display = 'none';
+    document.getElementById('mainSubtitle').style.display = 'none';
+  }
 
   // =============================================
   // UI HELPERS
@@ -490,10 +516,6 @@
       document.execCommand('copy');
       setStatus('Copied to clipboard.', 'success');
     });
-  }
-
-  function copyString(str) {
-    navigator.clipboard.writeText(str).catch(() => {});
   }
 
   // =============================================
@@ -527,7 +549,7 @@
   }
 
   // =============================================
-  // SHARER FLOW
+  // ROUTE 1: SHARER FLOW
   // =============================================
 
   async function startSharing() {
@@ -605,7 +627,7 @@
     await waitForIceGathering(pc);
 
     const offerCode = encode(pc.localDescription.toJSON());
-    const link = `${BASE_URL}/#offer=${encodeURIComponent(offerCode)}&idx=${idx}&sid=${sessionId}`;
+    const link = `${BASE_URL}#offer=${encodeURIComponent(offerCode)}&idx=${idx}&sid=${sessionId}`;
 
     document.getElementById('vlink-' + idx).textContent = link;
     document.getElementById('vcopy-' + idx).disabled = false;
@@ -629,8 +651,7 @@
   }
 
   function toggleManual(idx) {
-    const el = document.getElementById('vmanual-' + idx);
-    el.classList.toggle('visible');
+    document.getElementById('vmanual-' + idx).classList.toggle('visible');
   }
 
   async function connectViewer(idx) {
@@ -654,12 +675,12 @@
     }
   }
 
-  // Called when a viewer tab sends its answer via BroadcastChannel
+  // Sharer receives answer via BroadcastChannel from a relay tab
   async function receiveAnswerFromBroadcast(idx, code) {
     const viewer = viewers.get(idx);
     if (!viewer) return;
 
-    // Send ack so the viewer tab knows it can close
+    // Ack so the relay tab knows it worked
     bc.postMessage({ type: 'ack', ackFor: `${sessionId}-${idx}` });
 
     try {
@@ -672,9 +693,9 @@
         statusEl.textContent = 'Connecting...';
         statusEl.className = 'viewer-status waiting';
       }
-      setStatus('Viewer ' + (idx + 1) + ' response received automatically. Connecting...', 'info');
+      setStatus('Viewer ' + (idx + 1) + ' response received. Connecting...', 'info');
     } catch (e) {
-      setStatus('Failed to process auto-response from Viewer ' + (idx + 1) + '.', 'error');
+      setStatus('Failed to process response from Viewer ' + (idx + 1) + '.', 'error');
     }
   }
 
@@ -691,23 +712,27 @@
   }
 
   // =============================================
-  // AUTO-VIEWER FLOW (opened via invite link)
+  // ROUTE 2: VIEWER OFFER PAGE
+  // Opened on the viewer's machine via invite link.
+  // Generates the answer, shows a response link.
+  // The viewer copies that link and sends it back.
+  // Then waits for the P2P connection.
   // =============================================
 
-  async function bootAutoViewer(params) {
-    // Hide normal UI, show auto-viewer page
-    document.getElementById('setupUI').style.display = 'none';
-    document.getElementById('mainTitle').style.display = 'none';
-    document.getElementById('mainSubtitle').style.display = 'none';
-    document.getElementById('autoViewerPage').style.display = 'block';
-
-    ackId = `${params.sid}-${params.idx}`;
+  async function bootViewerOfferPage(params) {
+    const titleEl = document.getElementById('offerTitle');
+    const descEl = document.getElementById('offerDesc');
+    const spinnerEl = document.getElementById('offerSpinner');
+    const resultEl = document.getElementById('offerResult');
 
     let offer;
     try {
       offer = decode(decodeURIComponent(params.offer));
     } catch (e) {
-      showAutoError('Invalid invite link. The link may be corrupted or incomplete.');
+      spinnerEl.style.display = 'none';
+      titleEl.textContent = 'Invalid Link';
+      descEl.textContent = '';
+      resultEl.innerHTML = '<div class="result-box error">The invite link is corrupted or incomplete. Ask the sharer for a new one.</div>';
       return;
     }
 
@@ -733,59 +758,94 @@
       await waitForIceGathering(viewerPc);
 
       const answerCode = encode(viewerPc.localDescription.toJSON());
+      const responseLink = `${BASE_URL}#answer=${encodeURIComponent(answerCode)}&idx=${params.idx}&sid=${params.sid}`;
 
-      // Send answer to sharer tab via BroadcastChannel
-      bc.postMessage({
-        type: 'answer',
-        sid: params.sid,
-        idx: parseInt(params.idx),
-        code: answerCode
-      });
+      spinnerEl.style.display = 'none';
+      titleEl.textContent = 'Response ready!';
+      descEl.textContent = 'Send this response link back to the sharer. Once they open it, the connection will be established and you\'ll see their screen here.';
 
-      document.getElementById('autoTitle').textContent = 'Response sent!';
-      document.getElementById('autoDesc').textContent = 'Waiting for the sharer to confirm the connection...';
+      resultEl.innerHTML = `
+        <div class="response-link-box" id="responseLinkBox">${responseLink}</div>
+        <div class="btn-row" style="justify-content:center;">
+          <button class="btn-primary" id="copyResponseLink">Copy Response Link</button>
+        </div>
+        <div class="result-box info" style="margin-top:1rem;">Waiting for the sharer to open your response link...</div>
+      `;
 
-      // Store code for fallback
-      document.getElementById('autoFallbackCode').value = answerCode;
-
-      // Wait for ack. If no ack in 4 seconds, show fallback.
-      setTimeout(() => {
-        if (!gotAck) {
-          showAutoFallback();
-        }
-      }, 4000);
+      document.getElementById('copyResponseLink').onclick = () => {
+        navigator.clipboard.writeText(responseLink).then(() => {
+          document.getElementById('copyResponseLink').textContent = 'Copied!';
+          setTimeout(() => {
+            document.getElementById('copyResponseLink').textContent = 'Copy Response Link';
+          }, 2000);
+        });
+      };
 
     } catch (e) {
-      showAutoError('Failed to process invite. The link may be expired or invalid.');
+      spinnerEl.style.display = 'none';
+      titleEl.textContent = 'Error';
+      descEl.textContent = '';
+      resultEl.innerHTML = '<div class="result-box error">Failed to process invite. The link may be expired or invalid.</div>';
     }
   }
 
-  function handleAck() {
-    document.getElementById('autoSpinner').style.display = 'none';
-    document.getElementById('autoTitle').textContent = 'Connected!';
-    document.getElementById('autoDesc').textContent = 'The sharer received your response. Waiting for the stream to start...';
-    document.getElementById('autoResult').innerHTML =
-      '<div class="done-message">Handshake complete. The stream will appear momentarily.</div>';
+  // =============================================
+  // ROUTE 3: ANSWER RELAY PAGE
+  // Opened on the sharer's machine when they click
+  // the response link. Sends answer to the original
+  // sharer tab via BroadcastChannel, then closes.
+  // =============================================
+
+  function bootAnswerRelayPage(params) {
+    const titleEl = document.getElementById('relayTitle');
+    const descEl = document.getElementById('relayDesc');
+    const spinnerEl = document.getElementById('relaySpinner');
+    const resultEl = document.getElementById('relayResult');
+
+    relayAckId = `${params.sid}-${params.idx}`;
+
+    // Send the answer to the sharer tab
+    bc.postMessage({
+      type: 'answer',
+      sid: params.sid,
+      idx: parseInt(params.idx),
+      code: decodeURIComponent(params.answer)
+    });
+
+    // Wait for ack
+    setTimeout(() => {
+      if (!relayGotAck) {
+        // No ack - sharer tab may not be open
+        spinnerEl.style.display = 'none';
+        titleEl.textContent = 'Could not reach the sharer tab';
+        descEl.textContent = 'The sharer\'s original tab may be closed or on a different browser. They can paste the response code manually instead.';
+        resultEl.innerHTML = `
+          <textarea id="relayFallbackCode" readonly style="margin-top:1rem;">${decodeURIComponent(params.answer)}</textarea>
+          <div class="btn-row" style="justify-content:center;">
+            <button class="btn-secondary" onclick="copyText('relayFallbackCode')">Copy Response Code</button>
+          </div>
+        `;
+      }
+    }, 4000);
   }
 
-  function showAutoFallback() {
-    document.getElementById('autoSpinner').style.display = 'none';
-    document.getElementById('autoTitle').textContent = 'Could not reach the sharer tab automatically';
-    document.getElementById('autoDesc').textContent =
-      'The sharer may have their tab closed, or is on a different browser. Copy the response code below and send it to them manually.';
-    document.getElementById('autoFallback').style.display = 'block';
-  }
+  function handleRelayAck() {
+    const spinnerEl = document.getElementById('relaySpinner');
+    const titleEl = document.getElementById('relayTitle');
+    const descEl = document.getElementById('relayDesc');
+    const resultEl = document.getElementById('relayResult');
 
-  function showAutoError(msg) {
-    document.getElementById('autoSpinner').style.display = 'none';
-    document.getElementById('autoTitle').textContent = 'Error';
-    document.getElementById('autoDesc').textContent = '';
-    document.getElementById('autoResult').innerHTML =
-      '<div class="error-message">' + msg + '</div>';
+    spinnerEl.style.display = 'none';
+    titleEl.textContent = 'Done!';
+    descEl.textContent = '';
+    resultEl.innerHTML = '<div class="result-box success">Response delivered to the sharer tab. You can close this tab and return to the original one.</div>';
+
+    // Try to close this tab (may be blocked by browser)
+    setTimeout(() => { window.close(); }, 1500);
   }
 
   // =============================================
-  // MANUAL VIEWER FLOW (fallback, same as before)
+  // ROUTE 1: MANUAL VIEWER FLOW (fallback)
   // =============================================
 
   async function generateAnswerManual() {
@@ -839,7 +899,8 @@
 
   function enterViewerMode() {
     document.getElementById('setupUI').style.display = 'none';
-    document.getElementById('autoViewerPage').style.display = 'none';
+    document.getElementById('viewerOfferPage').style.display = 'none';
+    document.getElementById('answerRelayPage').style.display = 'none';
     document.getElementById('mainTitle').style.display = 'none';
     document.getElementById('mainSubtitle').style.display = 'none';
     document.body.classList.add('viewing');
@@ -870,9 +931,7 @@
     document.getElementById('btnGenAnswer').disabled = false;
     document.getElementById('remoteVideo').srcObject = null;
 
-    // Clear hash so we don't re-enter auto-viewer on refresh
     history.replaceState(null, '', location.pathname);
-
     setStatus('Disconnected.', 'info');
   }
 </script>
