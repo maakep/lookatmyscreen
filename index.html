@@ -17,10 +17,7 @@
     align-items: center;
   }
 
-  /* When viewing, body becomes the video canvas */
-  body.viewing {
-    overflow: hidden;
-  }
+  body.viewing { overflow: hidden; }
 
   h1 {
     margin: 2rem 0 0.25rem;
@@ -43,7 +40,6 @@
     align-items: center;
   }
 
-  /* Steps */
   .steps {
     display: flex;
     gap: 1rem;
@@ -66,7 +62,6 @@
   .step-btn:hover { border-color: #555; }
   .step-btn.active { border-color: #6c63ff; color: #fff; background: #1a1a2e; }
 
-  /* Panels */
   .panel {
     display: none;
     width: 100%;
@@ -107,23 +102,14 @@
     font-weight: 500;
   }
 
-  .btn-primary {
-    background: #6c63ff;
-    color: #fff;
-  }
+  .btn-primary { background: #6c63ff; color: #fff; }
   .btn-primary:hover { background: #5a52d5; }
   .btn-primary:disabled { background: #333; color: #666; cursor: not-allowed; }
 
-  .btn-secondary {
-    background: #2a2a3a;
-    color: #ccc;
-  }
+  .btn-secondary { background: #2a2a3a; color: #ccc; }
   .btn-secondary:hover { background: #3a3a4a; }
 
-  .btn-danger {
-    background: #5a2020;
-    color: #e88;
-  }
+  .btn-danger { background: #5a2020; color: #e88; }
   .btn-danger:hover { background: #6a2a2a; }
 
   .btn-row {
@@ -135,7 +121,7 @@
 
   textarea {
     width: 100%;
-    min-height: 100px;
+    min-height: 80px;
     background: #0a0a0f;
     border: 1px solid #333;
     border-radius: 8px;
@@ -150,7 +136,6 @@
 
   textarea:focus { outline: none; border-color: #6c63ff; }
 
-  /* Viewer slots on the sharer side */
   .viewer-slot {
     background: #0d0d18;
     border: 1px solid #2a2a3a;
@@ -166,10 +151,7 @@
     margin-bottom: 0.75rem;
   }
 
-  .viewer-slot-header h3 {
-    font-size: 0.95rem;
-    color: #ccc;
-  }
+  .viewer-slot-header h3 { font-size: 0.95rem; color: #ccc; }
 
   .viewer-status {
     font-size: 0.75rem;
@@ -182,28 +164,55 @@
   .viewer-status.connected { background: #1a3a1a; color: #6c6; }
   .viewer-status.disconnected { background: #3a1a1a; color: #c66; }
 
+  .invite-link-box {
+    background: #0a0a0f;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 0.6rem 0.75rem;
+    margin-bottom: 0.75rem;
+    word-break: break-all;
+    font-size: 0.7rem;
+    color: #6c63ff;
+    font-family: 'Consolas', 'Monaco', monospace;
+    max-height: 60px;
+    overflow-y: auto;
+    user-select: all;
+  }
+
+  .manual-toggle {
+    font-size: 0.75rem;
+    color: #555;
+    cursor: pointer;
+    border: none;
+    background: none;
+    padding: 0;
+    margin-bottom: 0.75rem;
+    text-decoration: underline;
+  }
+
+  .manual-toggle:hover { color: #888; }
+
+  .manual-section { display: none; }
+  .manual-section.visible { display: block; }
+
   /* Full-page viewer mode */
   #viewerScreen {
     display: none;
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
     background: #000;
     z-index: 1000;
   }
 
   #viewerScreen video {
-    width: 100%;
-    height: 100%;
+    width: 100%; height: 100%;
     object-fit: contain;
   }
 
   #viewerOverlay {
     position: absolute;
-    top: 0;
-    left: 0;
+    top: 0; left: 0;
     width: 100%;
     padding: 1rem;
     display: flex;
@@ -221,15 +230,63 @@
     pointer-events: auto;
   }
 
-  #viewerOverlay .overlay-label {
-    color: #6c63ff;
-    font-size: 0.85rem;
-    font-weight: 600;
+  #viewerOverlay .overlay-label { color: #6c63ff; font-size: 0.85rem; font-weight: 600; }
+  #viewerOverlay .overlay-status { color: #6c6; font-size: 0.75rem; }
+
+  /* Auto-viewer page (opened via link) */
+  #autoViewerPage {
+    display: none;
+    text-align: center;
+    padding: 3rem 1.5rem;
+    max-width: 600px;
   }
 
-  #viewerOverlay .overlay-status {
+  #autoViewerPage h2 { margin-bottom: 0.5rem; }
+
+  #autoViewerPage .desc {
+    color: #888;
+    font-size: 0.85rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 24px; height: 24px;
+    border: 3px solid #333;
+    border-top-color: #6c63ff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 1rem;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .done-message {
+    background: #1a2e1a;
+    border: 1px solid #2a4e2a;
     color: #6c6;
-    font-size: 0.75rem;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .error-message {
+    background: #2e1a1a;
+    border: 1px solid #4e2a2a;
+    color: #c66;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .fallback-section {
+    margin-top: 1.5rem;
+    text-align: left;
   }
 
   /* Status */
@@ -250,9 +307,10 @@
 </head>
 <body>
 
-<h1>Look At My Screen</h1>
-<p class="subtitle">Peer-to-peer screen sharing. No backend. Just a link.</p>
+<h1 id="mainTitle">Look At My Screen</h1>
+<p class="subtitle" id="mainSubtitle">Peer-to-peer screen sharing. No backend. Just a link.</p>
 
+<!-- Normal setup UI (sharer + manual viewer) -->
 <div class="container" id="setupUI">
   <div class="steps">
     <button class="step-btn active" onclick="showPanel('share', this)">Share My Screen</button>
@@ -263,14 +321,14 @@
   <div id="panel-share" class="panel visible">
     <h2>Share Your Screen</h2>
     <p class="desc">
-      Start sharing, then generate invite codes for each viewer.
-      Each viewer gets their own code and sends back a response to connect.
+      Start sharing, then send the invite link to each viewer.
+      Viewers open the link and the connection is established automatically.
     </p>
 
     <ol>
       <li>Click <strong>Start Sharing</strong> to pick a screen/window</li>
-      <li>Send each viewer's invite code to them</li>
-      <li>Paste each viewer's response code and click <strong>Connect</strong></li>
+      <li>Send each viewer's <strong>invite link</strong> (via Slack, email, etc.)</li>
+      <li>Viewers open the link and connect automatically</li>
       <li>Use <strong>+ Add Viewer</strong> for additional viewers</li>
     </ol>
 
@@ -285,22 +343,21 @@
     </div>
   </div>
 
-  <!-- VIEW PANEL -->
+  <!-- MANUAL VIEW PANEL (fallback) -->
   <div id="panel-view" class="panel">
     <h2>View a Screen</h2>
-    <p class="desc">Paste the sharer's invite code to generate a response code. Send it back to complete the connection.</p>
+    <p class="desc">If you received a raw code instead of a link, paste it here to connect manually.</p>
 
     <ol>
       <li>Paste the sharer's invite code below</li>
       <li>Click <strong>Generate Response</strong></li>
       <li>Copy the response code and send it back to the sharer</li>
-      <li>Once connected, the shared screen takes over the page</li>
     </ol>
 
     <label style="font-size:0.8rem;color:#888;">Paste the invite code here:</label>
     <textarea id="viewOffer" placeholder="Paste invite code here..."></textarea>
     <div class="btn-row">
-      <button class="btn-primary" id="btnGenAnswer" onclick="generateAnswer()">Generate Response</button>
+      <button class="btn-primary" id="btnGenAnswer" onclick="generateAnswerManual()">Generate Response</button>
     </div>
 
     <div id="viewAnswerBox" style="display:none">
@@ -315,7 +372,22 @@
   <div id="status"></div>
 </div>
 
-<!-- Full-page viewer screen (hidden until connected) -->
+<!-- Auto-viewer page (shown when opened via invite link) -->
+<div id="autoViewerPage">
+  <div class="spinner" id="autoSpinner"></div>
+  <h2 id="autoTitle">Connecting...</h2>
+  <p class="desc" id="autoDesc">Generating response and sending it back to the sharer. Please wait.</p>
+  <div id="autoResult"></div>
+  <div class="fallback-section" id="autoFallback" style="display:none">
+    <label style="font-size:0.8rem;color:#888;">Response code (copy and send back to the sharer manually):</label>
+    <textarea id="autoFallbackCode" readonly></textarea>
+    <div class="btn-row">
+      <button class="btn-secondary" onclick="copyText('autoFallbackCode')">Copy Response Code</button>
+    </div>
+  </div>
+</div>
+
+<!-- Full-page viewer screen -->
 <div id="viewerScreen">
   <video id="remoteVideo" autoplay playsinline></video>
   <div id="viewerOverlay">
@@ -328,13 +400,73 @@
 </div>
 
 <script>
-  // --- State ---
+  // =============================================
+  // CONFIG
+  // =============================================
+  const BASE_URL = window.location.origin + window.location.pathname;
+  const ICE_SERVERS = [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' }
+  ];
+
+  // =============================================
+  // STATE
+  // =============================================
   let localStream = null;
   let viewerIndex = 0;
-  const viewers = new Map(); // index -> { pc, state }
-  let viewerPc = null; // for the viewer role
+  const viewers = new Map(); // idx -> { pc, state }
+  let viewerPc = null;       // viewer role
+  const sessionId = crypto.randomUUID(); // unique per sharer tab
 
-  // --- UI helpers ---
+  // =============================================
+  // BROADCAST CHANNEL (same-origin cross-tab)
+  // =============================================
+  const bc = new BroadcastChannel('lookatmyscreen');
+
+  bc.onmessage = (e) => {
+    const { type, sid, idx, code } = e.data;
+
+    // Sharer receives an answer from a viewer tab
+    if (type === 'answer' && sid === sessionId) {
+      receiveAnswerFromBroadcast(idx, code);
+    }
+
+    // Viewer tab receives ack from sharer -> safe to close
+    if (type === 'ack' && e.data.ackFor === ackId) {
+      gotAck = true;
+      handleAck();
+    }
+  };
+
+  // =============================================
+  // URL HASH PARSING
+  // =============================================
+  function parseHash() {
+    const hash = location.hash.slice(1); // remove #
+    const params = new URLSearchParams(hash);
+    return {
+      offer: params.get('offer'),
+      idx: params.get('idx'),
+      sid: params.get('sid')
+    };
+  }
+
+  // =============================================
+  // BOOT: decide which mode to show
+  // =============================================
+  const hashParams = parseHash();
+  let ackId = null;
+  let gotAck = false;
+
+  if (hashParams.offer && hashParams.sid) {
+    // Opened via invite link -> auto-viewer mode
+    bootAutoViewer(hashParams);
+  }
+  // else: normal mode (sharer / manual viewer), default UI shown
+
+  // =============================================
+  // UI HELPERS
+  // =============================================
 
   function showPanel(name, btn) {
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('visible'));
@@ -360,7 +492,13 @@
     });
   }
 
-  // --- Encode / Decode SDP ---
+  function copyString(str) {
+    navigator.clipboard.writeText(str).catch(() => {});
+  }
+
+  // =============================================
+  // ENCODE / DECODE
+  // =============================================
 
   function encode(obj) {
     return btoa(JSON.stringify(obj));
@@ -370,14 +508,13 @@
     return JSON.parse(atob(str.trim()));
   }
 
-  // --- WebRTC helpers ---
+  // =============================================
+  // WEBRTC HELPERS
+  // =============================================
 
   function waitForIceGathering(pc) {
     return new Promise((resolve) => {
-      if (pc.iceGatheringState === 'complete') {
-        resolve();
-        return;
-      }
+      if (pc.iceGatheringState === 'complete') { resolve(); return; }
       const handler = () => {
         if (pc.iceGatheringState === 'complete') {
           pc.removeEventListener('icegatheringstatechange', handler);
@@ -385,12 +522,12 @@
         }
       };
       pc.addEventListener('icegatheringstatechange', handler);
-      setTimeout(resolve, 3000);
+      setTimeout(resolve, 5000);
     });
   }
 
   // =============================================
-  // SHARER FLOW - supports multiple viewers
+  // SHARER FLOW
   // =============================================
 
   async function startSharing() {
@@ -412,9 +549,7 @@
 
     document.getElementById('btnStartShare').disabled = true;
     document.getElementById('addViewerRow').style.display = 'flex';
-
     setStatus('Screen captured. Generating first viewer invite...', 'info');
-
     addViewerSlot();
   }
 
@@ -430,26 +565,23 @@
         <h3>Viewer ${idx + 1}</h3>
         <span class="viewer-status waiting" id="vstatus-${idx}">Generating...</span>
       </div>
-      <label style="font-size:0.8rem;color:#888;">Invite code for this viewer:</label>
-      <textarea id="voffer-${idx}" readonly>Generating...</textarea>
+      <label style="font-size:0.8rem;color:#888;">Invite link (send this to the viewer):</label>
+      <div class="invite-link-box" id="vlink-${idx}">Generating...</div>
       <div class="btn-row">
-        <button class="btn-secondary" onclick="copyText('voffer-${idx}')">Copy Invite Code</button>
+        <button class="btn-primary" id="vcopy-${idx}" onclick="copyInviteLink(${idx})" disabled>Copy Invite Link</button>
       </div>
-      <label style="font-size:0.8rem;color:#888;">Paste this viewer's response code:</label>
-      <textarea id="vanswer-${idx}" placeholder="Paste response code here..."></textarea>
-      <div class="btn-row">
-        <button class="btn-primary" id="vconnect-${idx}" onclick="connectViewer(${idx})">Connect</button>
+      <button class="manual-toggle" onclick="toggleManual(${idx})">Manual paste fallback</button>
+      <div class="manual-section" id="vmanual-${idx}">
+        <label style="font-size:0.8rem;color:#888;">Paste this viewer's response code:</label>
+        <textarea id="vanswer-${idx}" placeholder="Paste response code here..."></textarea>
+        <div class="btn-row">
+          <button class="btn-primary" id="vconnect-${idx}" onclick="connectViewer(${idx})">Connect</button>
+        </div>
       </div>
     `;
     container.appendChild(slot);
 
-    // Create a dedicated RTCPeerConnection for this viewer
-    const pc = new RTCPeerConnection({
-      iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' }
-      ]
-    });
+    const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
 
     pc.oniceconnectionstatechange = () => {
       const state = pc.iceConnectionState;
@@ -472,16 +604,33 @@
     await pc.setLocalDescription(offer);
     await waitForIceGathering(pc);
 
-    const code = encode(pc.localDescription.toJSON());
-    document.getElementById('voffer-' + idx).value = code;
+    const offerCode = encode(pc.localDescription.toJSON());
+    const link = `${BASE_URL}/#offer=${encodeURIComponent(offerCode)}&idx=${idx}&sid=${sessionId}`;
+
+    document.getElementById('vlink-' + idx).textContent = link;
+    document.getElementById('vcopy-' + idx).disabled = false;
 
     const statusEl = document.getElementById('vstatus-' + idx);
-    statusEl.textContent = 'Waiting for response';
+    statusEl.textContent = 'Waiting for viewer';
     statusEl.className = 'viewer-status waiting';
 
-    viewers.set(idx, { pc, state: 'waiting' });
+    viewers.set(idx, { pc, state: 'waiting', link });
+    setStatus('Viewer ' + (idx + 1) + ' invite link ready. Send it to the viewer.', 'success');
+  }
 
-    setStatus('Viewer ' + (idx + 1) + ' invite code ready. Send it to the viewer.', 'success');
+  function copyInviteLink(idx) {
+    const viewer = viewers.get(idx);
+    if (!viewer) return;
+    navigator.clipboard.writeText(viewer.link).then(() => {
+      setStatus('Invite link copied to clipboard.', 'success');
+    }).catch(() => {
+      setStatus('Could not copy. Select the link manually.', 'error');
+    });
+  }
+
+  function toggleManual(idx) {
+    const el = document.getElementById('vmanual-' + idx);
+    el.classList.toggle('visible');
   }
 
   async function connectViewer(idx) {
@@ -501,7 +650,31 @@
       document.getElementById('vconnect-' + idx).disabled = true;
       setStatus('Connecting to Viewer ' + (idx + 1) + '...', 'info');
     } catch (e) {
-      setStatus('Invalid response code for Viewer ' + (idx + 1) + '. Check and try again.', 'error');
+      setStatus('Invalid response code for Viewer ' + (idx + 1) + '.', 'error');
+    }
+  }
+
+  // Called when a viewer tab sends its answer via BroadcastChannel
+  async function receiveAnswerFromBroadcast(idx, code) {
+    const viewer = viewers.get(idx);
+    if (!viewer) return;
+
+    // Send ack so the viewer tab knows it can close
+    bc.postMessage({ type: 'ack', ackFor: `${sessionId}-${idx}` });
+
+    try {
+      const answer = decode(code);
+      await viewer.pc.setRemoteDescription(new RTCSessionDescription(answer));
+      viewer.state = 'connecting';
+
+      const statusEl = document.getElementById('vstatus-' + idx);
+      if (statusEl) {
+        statusEl.textContent = 'Connecting...';
+        statusEl.className = 'viewer-status waiting';
+      }
+      setStatus('Viewer ' + (idx + 1) + ' response received automatically. Connecting...', 'info');
+    } catch (e) {
+      setStatus('Failed to process auto-response from Viewer ' + (idx + 1) + '.', 'error');
     }
   }
 
@@ -518,10 +691,104 @@
   }
 
   // =============================================
-  // VIEWER FLOW - full-page video on connect
+  // AUTO-VIEWER FLOW (opened via invite link)
   // =============================================
 
-  async function generateAnswer() {
+  async function bootAutoViewer(params) {
+    // Hide normal UI, show auto-viewer page
+    document.getElementById('setupUI').style.display = 'none';
+    document.getElementById('mainTitle').style.display = 'none';
+    document.getElementById('mainSubtitle').style.display = 'none';
+    document.getElementById('autoViewerPage').style.display = 'block';
+
+    ackId = `${params.sid}-${params.idx}`;
+
+    let offer;
+    try {
+      offer = decode(decodeURIComponent(params.offer));
+    } catch (e) {
+      showAutoError('Invalid invite link. The link may be corrupted or incomplete.');
+      return;
+    }
+
+    viewerPc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+
+    viewerPc.oniceconnectionstatechange = () => {
+      const state = viewerPc.iceConnectionState;
+      if (state === 'connected' || state === 'completed') {
+        enterViewerMode();
+      } else if (state === 'disconnected' || state === 'failed') {
+        document.getElementById('overlayStatus').textContent = 'Connection lost';
+      }
+    };
+
+    viewerPc.ontrack = (event) => {
+      document.getElementById('remoteVideo').srcObject = event.streams[0];
+    };
+
+    try {
+      await viewerPc.setRemoteDescription(new RTCSessionDescription(offer));
+      const answer = await viewerPc.createAnswer();
+      await viewerPc.setLocalDescription(answer);
+      await waitForIceGathering(viewerPc);
+
+      const answerCode = encode(viewerPc.localDescription.toJSON());
+
+      // Send answer to sharer tab via BroadcastChannel
+      bc.postMessage({
+        type: 'answer',
+        sid: params.sid,
+        idx: parseInt(params.idx),
+        code: answerCode
+      });
+
+      document.getElementById('autoTitle').textContent = 'Response sent!';
+      document.getElementById('autoDesc').textContent = 'Waiting for the sharer to confirm the connection...';
+
+      // Store code for fallback
+      document.getElementById('autoFallbackCode').value = answerCode;
+
+      // Wait for ack. If no ack in 4 seconds, show fallback.
+      setTimeout(() => {
+        if (!gotAck) {
+          showAutoFallback();
+        }
+      }, 4000);
+
+    } catch (e) {
+      showAutoError('Failed to process invite. The link may be expired or invalid.');
+    }
+  }
+
+  function handleAck() {
+    document.getElementById('autoSpinner').style.display = 'none';
+    document.getElementById('autoTitle').textContent = 'Connected!';
+    document.getElementById('autoDesc').textContent = 'The sharer received your response. Waiting for the stream to start...';
+    document.getElementById('autoResult').innerHTML =
+      '<div class="done-message">Handshake complete. The stream will appear momentarily.</div>';
+  }
+
+  function showAutoFallback() {
+    document.getElementById('autoSpinner').style.display = 'none';
+    document.getElementById('autoTitle').textContent = 'Could not reach the sharer tab automatically';
+    document.getElementById('autoDesc').textContent =
+      'The sharer may have their tab closed, or is on a different browser. Copy the response code below and send it to them manually.';
+    document.getElementById('autoFallback').style.display = 'block';
+  }
+
+  function showAutoError(msg) {
+    document.getElementById('autoSpinner').style.display = 'none';
+    document.getElementById('autoTitle').textContent = 'Error';
+    document.getElementById('autoDesc').textContent = '';
+    document.getElementById('autoResult').innerHTML =
+      '<div class="error-message">' + msg + '</div>';
+  }
+
+  // =============================================
+  // MANUAL VIEWER FLOW (fallback, same as before)
+  // =============================================
+
+  async function generateAnswerManual() {
     const offerCode = document.getElementById('viewOffer').value.trim();
     if (!offerCode) {
       setStatus('Please paste the invite code first.', 'error');
@@ -538,12 +805,7 @@
 
     setStatus('Generating response code...', 'info');
 
-    viewerPc = new RTCPeerConnection({
-      iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' }
-      ]
-    });
+    viewerPc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
 
     viewerPc.oniceconnectionstatechange = () => {
       const state = viewerPc.iceConnectionState;
@@ -559,10 +821,8 @@
     };
 
     await viewerPc.setRemoteDescription(new RTCSessionDescription(offer));
-
     const answer = await viewerPc.createAnswer();
     await viewerPc.setLocalDescription(answer);
-
     await waitForIceGathering(viewerPc);
 
     const code = encode(viewerPc.localDescription.toJSON());
@@ -573,18 +833,21 @@
     setStatus('Response code ready. Send it back to the sharer, then wait for the connection.', 'success');
   }
 
+  // =============================================
+  // VIEWER MODE (full-page video)
+  // =============================================
+
   function enterViewerMode() {
-    // Hide all setup UI, show full-page video
     document.getElementById('setupUI').style.display = 'none';
-    document.querySelector('h1').style.display = 'none';
-    document.querySelector('.subtitle').style.display = 'none';
+    document.getElementById('autoViewerPage').style.display = 'none';
+    document.getElementById('mainTitle').style.display = 'none';
+    document.getElementById('mainSubtitle').style.display = 'none';
     document.body.classList.add('viewing');
 
     const screen = document.getElementById('viewerScreen');
     screen.style.display = 'block';
     document.getElementById('overlayStatus').textContent = 'Connected';
 
-    // Briefly show overlay so the user knows they can hover
     screen.classList.add('show-overlay');
     setTimeout(() => screen.classList.remove('show-overlay'), 2000);
   }
@@ -595,19 +858,20 @@
       viewerPc = null;
     }
 
-    // Restore setup UI
     document.getElementById('viewerScreen').style.display = 'none';
     document.body.classList.remove('viewing');
     document.getElementById('setupUI').style.display = 'flex';
-    document.querySelector('h1').style.display = '';
-    document.querySelector('.subtitle').style.display = '';
+    document.getElementById('mainTitle').style.display = '';
+    document.getElementById('mainSubtitle').style.display = '';
 
-    // Reset viewer form
     document.getElementById('viewOffer').value = '';
     document.getElementById('viewAnswer').value = '';
     document.getElementById('viewAnswerBox').style.display = 'none';
     document.getElementById('btnGenAnswer').disabled = false;
     document.getElementById('remoteVideo').srcObject = null;
+
+    // Clear hash so we don't re-enter auto-viewer on refresh
+    history.replaceState(null, '', location.pathname);
 
     setStatus('Disconnected.', 'info');
   }
