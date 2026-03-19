@@ -2,7 +2,7 @@
 
 Peer-to-peer screen sharing in a single HTML file. No backend, no signaling server, no install.
 
-Models: Human brain for idea, Sonnet 4.6 for plan, Opus 4.6 for build
+Built with: Human brain for idea, Sonnet 4.6 for plan, Opus 4.6 for build
 
 ---
 
